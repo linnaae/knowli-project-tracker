@@ -15,3 +15,16 @@ python -m venv venv
 source venv/bin/activate  # or .\venv\Scripts\activate on Windows
 pip install -r requirements.txt
 python app.py
+```
+
+### Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
+Then commit and push it:
+```bash
+git add README.md
+git commit -m "Add README with basic project info"
+git push
