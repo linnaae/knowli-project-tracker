@@ -1,0 +1,27 @@
+# Node.js
+node_modules/
+dist/
+.vite/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+env/
+venv/
+.venv/
+
+# SQLite (optional if you don’t want to track the DB)
+*.sqlite3
+
+# VSCode/Editor
+.vscode/
+.idea/
+.DS_Store
+
+# OS/System files
+*.swp
+*.swo
+*.swn

@@ -1,0 +1,7 @@
+{
+  "client": ["DCF", "AHCA", "DEP", "CMS"],
+  "client_type": ["government", "nonprofit", "vendor"],
+  "domain": ["health", "environment", "fraud", "finance", "education"],
+  "technology": ["SQL", "Alteryx", "Power BI", "Tableau", "Python", "Flask", "React", "machine learning"],
+  "project_type": ["dashboard", "automation", "analysis", "nlp", "scraping"]
+}

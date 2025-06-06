@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Project Tracker</title>
+</head>
+<body>
+
+    <h1>Search Projects</h1>
+    <form method="GET" action="/">
+        <input type="text" name="q" placeholder="Search title, description, or tags" value="{{ request.args.get('q', '') }}">
+        <button type="submit">Search</button>
+        {% if request.args.get('q') %}
+            <a href="/" style="margin-left:10px;">Clear</a>
+        {% endif %}
+    </form>
+
+    <p><a href="/create">+ Add New Project</a></p>
+
+    <hr>
+
+<style>
+    .filter-toggle {
+        font-weight: bold;
+        cursor: pointer;
+        background: #f0f0f0;
+        border: none;
+        padding: 6px 10px;
+        margin-top: 5px;
+        width: 100%;
+        text-align: left;
+    }
+
+    .filter-options {
+        display: none;
+        padding-left: 15px;
+        margin-bottom: 10px;
+    }
+</style>
+
+<script>
+    function toggleFilter(id) {
+        const section = document.getElementById(id);
+        section.style.display = section.style.display === 'none' ? 'block' : 'none';
+    }
+</script>
+
+<h2>Filter Projects</h2>
+<form method="GET" action="/">
+
+    <button type="button" class="filter-toggle" onclick="toggleFilter('client-filters')">Client</button>
+    <div id="client-filters" class="filter-options">
+        {% for c in ['DCF', 'AHCA', 'DEP', 'CMS'] %}
+            <label><input type="checkbox" name="client" value="{{ c }}" {% if c in request.args.getlist('client') %}checked{% endif %}> {{ c }}</label><br>
+        {% endfor %}
+    </div>
+
+    <button type="button" class="filter-toggle" onclick="toggleFilter('client-type-filters')">Client Type</button>
+    <div id="client-type-filters" class="filter-options">
+        {% for ct in ['government', 'nonprofit', 'vendor'] %}
+            <label><input type="checkbox" name="client_type" value="{{ ct }}" {% if ct in request.args.getlist('client_type') %}checked{% endif %}> {{ ct }}</label><br>
+        {% endfor %}
+    </div>
+
+    <button type="button" class="filter-toggle" onclick="toggleFilter('domain-filters')">Domain</button>
+    <div id="domain-filters" class="filter-options">
+        {% for d in ['health', 'environment', 'fraud', 'finance', 'education'] %}
+            <label><input type="checkbox" name="domain" value="{{ d }}" {% if d in request.args.getlist('domain') %}checked{% endif %}> {{ d }}</label><br>
+        {% endfor %}
+    </div>
+
+    <button type="button" class="filter-toggle" onclick="toggleFilter('tech-filters')">Technology</button>
+    <div id="tech-filters" class="filter-options">
+        {% for t in ['SQL', 'Alteryx', 'Power BI', 'Tableau', 'Python', 'Flask', 'React', 'machine learning'] %}
+            <label><input type="checkbox" name="technology" value="{{ t }}" {% if t in request.args.getlist('technology') %}checked{% endif %}> {{ t }}</label><br>
+        {% endfor %}
+    </div>
+
+    <button type="button" class="filter-toggle" onclick="toggleFilter('type-filters')">Project Type</button>
+    <div id="type-filters" class="filter-options">
+        {% for pt in ['dashboard', 'automation', 'analysis', 'nlp', 'scraping'] %}
+            <label><input type="checkbox" name="project_type" value="{{ pt }}" {% if pt in request.args.getlist('project_type') %}checked{% endif %}> {{ pt }}</label><br>
+        {% endfor %}
+    </div>
+
+    <br>
+    <button type="submit">Apply Filters</button>
+</form>
+
+<hr>
+
+
+    
+    <h2>Saved Projects</h2>
+{% for project in projects %}
+    <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+        <h3>{{ project[1] }}</h3>
+        <p>{{ project[2] }}</p>
+        {% set all_tags = project_tags.get(project[0], []) %}
+        {% set tag_values = all_tags | map(attribute=1) | list %}
+
+        
+        {% set clients = ['DCF', 'AHCA', 'DEP', 'CMS'] %}
+        {% set client_types = ['government', 'nonprofit', 'vendor'] %}
+        {% set domains = ['health', 'environment', 'fraud', 'finance', 'education'] %}
+        {% set techs = ['SQL', 'Alteryx', 'Power BI', 'Tableau', 'Python', 'Flask', 'React', 'machine learning'] %}
+        {% set types = ['dashboard', 'automation', 'analysis', 'nlp', 'scraping'] %}
+
+        <strong>Client:</strong>
+        {{ all_tags | select('in', clients) | join(', ') }}<br>
+
+        <strong>Client Type:</strong>
+        {{ all_tags | select('in', client_types) | join(', ') }}<br>
+
+        <strong>Domain:</strong>
+        {{ all_tags | select('in', domains) | join(', ') }}<br>
+
+        <strong>Technology:</strong>
+        {{ all_tags | select('in', techs) | join(', ') }}<br>
+
+        <strong>Project Type:</strong>
+        {{ all_tags | select('in', types) | join(', ') }}<br>
+
+        <strong>Freeform Tags:</strong>
+        {{ all_tags | reject('in', clients + client_types + domains + techs + types) | join(', ') }}<br>
+
+        <a href="/edit/{{ project[0] }}">Edit</a>
+        <form action="/delete/{{ project[0] }}" method="POST" style="display:inline;">
+            <button type="submit" onclick="return confirm('Are you sure you want to delete this project?');">Delete</button>
+        </form>
+    </div>
+{% endfor %}
+
+</body>
+</html>
