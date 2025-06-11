@@ -4,24 +4,43 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import tagOptions from '../constants/tagOptions.json';
 
+
+/**
+ * Component: ProjectForm
+ * Description: Form for creating or editing a project.
+ * Supports title, description, tag selection by category, and freeform tags.
+ *
+ * Props:
+ * - initialData (object): Optional initial values (used in edit mode)
+ * - onSubmit (function): Callback to handle form submission, returns true/false
+ */
 function ProjectForm({ initialData = {}, onSubmit }) {
   const navigate = useNavigate();
 
+  // State for project fields
   const [title, setTitle] = useState(initialData.title || '');
   const [description, setDescription] = useState(initialData.description || '');
+
+  // selectedTags: { client: [], technology: [], ... , extra: [] }
   const [selectedTags, setSelectedTags] = useState({});
   const [extraTags, setExtraTags] = useState('');
 
+  /**
+   * useEffect: On load (or when initialData.tags changes), group tags by category.
+   * Tags not found in tagOptions are treated as "extra" (freeform).
+   */
   useEffect(() => {
     if (initialData.tags) {
       const grouped = {};
       initialData.tags.forEach(tag => {
+        // Try to categorize tag
         for (const [cat, values] of Object.entries(tagOptions)) {
           if (values.includes(tag)) {
             grouped[cat] = [...(grouped[cat] || []), tag];
             return;
           }
         }
+        // If not in tagOptions, treat as extra
         grouped.extra = [...(grouped.extra || []), tag];
       });
       setSelectedTags(grouped);
@@ -29,30 +48,46 @@ function ProjectForm({ initialData = {}, onSubmit }) {
     }
   }, [initialData]);
 
+  /**
+   * handleCheckboxChange
+   * Toggles a tag within its category.
+   *
+   * @param {string} category - Tag category
+   * @param {string} value - Tag value
+   */
   const handleCheckboxChange = (category, value) => {
     const current = selectedTags[category] || [];
     setSelectedTags({
       ...selectedTags,
       [category]: current.includes(value)
-        ? current.filter(t => t !== value)
-        : [...current, value]
+        ? current.filter(t => t !== value) // Uncheck
+        : [...current, value]              // Check
     });
   };
 
+  /**
+   * handleSubmit
+   * Gathers all selected tags (structured + freeform),
+   * calls onSubmit callback, and navigates home if successful.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const allTags = [];
 
+    // Collect tags from structured categories
     for (const [cat, values] of Object.entries(selectedTags)) {
       if (cat !== 'extra') allTags.push(...values);
     }
 
+    // Append freeform tags (split by comma, trimmed)
     for (const val of extraTags.split(',').map(t => t.trim()).filter(Boolean)) {
       allTags.push(val);
     }
 
     const payload = { title, description, tags: allTags };
     const ok = onSubmit ? await onSubmit(payload) : true;
+    
     if (ok) navigate('/');
   };
 
